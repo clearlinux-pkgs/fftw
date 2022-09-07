@@ -4,7 +4,7 @@
 #
 Name     : fftw
 Version  : 3.3.10
-Release  : 33
+Release  : 35
 URL      : http://www.fftw.org/fftw-3.3.10.tar.gz
 Source0  : http://www.fftw.org/fftw-3.3.10.tar.gz
 Summary  : fast Fourier transform library
@@ -94,7 +94,7 @@ export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C.UTF-8
-export SOURCE_DATE_EPOCH=1657038711
+export SOURCE_DATE_EPOCH=1662582091
 export GCC_IGNORE_WERROR=1
 export AR=gcc-ar
 export RANLIB=gcc-ranlib
@@ -107,12 +107,12 @@ make  %{?_smp_mflags}  -n ||:
 
 
 %install
-export SOURCE_DATE_EPOCH=1657038711
+export SOURCE_DATE_EPOCH=1662582091
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/share/package-licenses/fftw
-cp %{_builddir}/fftw-3.3.10/COPYING %{buildroot}/usr/share/package-licenses/fftw/68c94ffc34f8ad2d7bfae3f5a6b996409211c1b1
-cp %{_builddir}/fftw-3.3.10/COPYRIGHT %{buildroot}/usr/share/package-licenses/fftw/1179609f742d35f1bcbf4ad694f371d64ee257ea
-cp %{_builddir}/fftw-3.3.10/doc/license.texi %{buildroot}/usr/share/package-licenses/fftw/ee99393637fb0b0a5df385deac9040c5305f38b2
+cp %{_builddir}/fftw-%{version}/COPYING %{buildroot}/usr/share/package-licenses/fftw/68c94ffc34f8ad2d7bfae3f5a6b996409211c1b1
+cp %{_builddir}/fftw-%{version}/COPYRIGHT %{buildroot}/usr/share/package-licenses/fftw/1179609f742d35f1bcbf4ad694f371d64ee257ea
+cp %{_builddir}/fftw-%{version}/doc/license.texi %{buildroot}/usr/share/package-licenses/fftw/ee99393637fb0b0a5df385deac9040c5305f38b2
 :
 ## install_append content
 CFLAGS_IN="$CFLAGS -ffunction-sections -falign-functions=32 -O3 -flto -fno-semantic-interposition "
@@ -122,17 +122,17 @@ for build in \
 "single,--enable-float,--enable-sse2,--libdir=/usr/lib64" \
 "double,--enable-sse2,--libdir=/usr/lib64" \
 "long-double,--enable-long-double,--libdir=/usr/lib64" \
-"single-avx2,--enable-float,--enable-avx2,--enable-fma,--libdir=/usr/lib64/haswell" \
+"single-avx2,--enable-float,--enable-avx2,--enable-fma,--libdir=/usr/lib64/glibc-hwcaps/x86-64-v3" \
 "double-avx2,--enable-avx2,--enable-fma,--libdir=/usr/lib64/haswell" \
-"single-avx512,--enable-float,--enable-avx2,--enable-avx512,--enable-fma,--libdir=/usr/lib64/haswell/avx512_1" \
-"double-avx512,--enable-avx2,--enable-avx512,--enable-fma,--libdir=/usr/lib64/haswell/avx512_1" \
+"single-avx512,--enable-float,--enable-avx2,--enable-avx512,--enable-fma,--libdir=/usr/lib64/glibc-hwcaps/x86-64-v4" \
+"double-avx512,--enable-avx2,--enable-avx512,--enable-fma,--libdir=/usr/lib64/glibc-hwcaps/x86-64-v4" \
 "single-mpi,--enable-mpi,--enable-float,--enable-sse2,--libdir=/usr/lib64"  \
 "double-mpi,--enable-mpi,--enable-sse2,--libdir=/usr/lib64" \
 "long-double-mpi,--enable-mpi,--enable-long-double,--libdir=/usr/lib64" \
-"single-avx2-mpi,--enable-mpi,--enable-float,--enable-avx2,--enable-fma,--libdir=/usr/lib64/haswell" \
-"double-avx2-mpi,--enable-mpi,--enable-avx2,--enable-fma,--libdir=/usr/lib64/haswell" \
-"single-avx512-mpi,--enable-mpi,--enable-float,--enable-avx2,--enable-avx512,--enable-fma,--libdir=/usr/lib64/haswell/avx512_1" \
-"double-avx512-mpi,--enable-mpi,--enable-avx2,--enable-avx512,--enable-fma,--libdir=/usr/lib64/haswell/avx512_1" ; \
+"single-avx2-mpi,--enable-mpi,--enable-float,--enable-avx2,--enable-fma,--libdir=/usr/lib64/glibc-hwcaps/x86-64-v3" \
+"double-avx2-mpi,--enable-mpi,--enable-avx2,--enable-fma,--libdir=/usr/lib64/glibc-hwcaps/x86-64-v3" \
+"single-avx512-mpi,--enable-mpi,--enable-float,--enable-avx2,--enable-avx512,--enable-fma,--libdir=/usr/lib64/glibc-hwcaps/x86-64-v4" \
+"double-avx512-mpi,--enable-mpi,--enable-avx2,--enable-avx512,--enable-fma,--libdir=/usr/lib64/glibc-hwcaps/x86-64-v4" ; \
 do
 skip_test=0
 dir=$(echo $build | cut -d, -f1)
@@ -167,6 +167,8 @@ popd
 done
 
 find %{buildroot}/usr/lib64 -name 'FFTW3*.cmake' -exec rm {} \;
+
+find %{buildroot}/usr/lib64/glibc-hwcaps -name '*.pc' -exec rm {} \;
 ## install_append end
 
 %files
@@ -189,22 +191,25 @@ find %{buildroot}/usr/lib64 -name 'FFTW3*.cmake' -exec rm {} \;
 /usr/include/fftw3l-mpi.f03
 /usr/include/fftw3l.f03
 /usr/include/fftw3q.f03
-/usr/lib64/haswell/avx512_1/libfftw3.so
-/usr/lib64/haswell/avx512_1/libfftw3_mpi.so
-/usr/lib64/haswell/avx512_1/libfftw3_omp.so
-/usr/lib64/haswell/avx512_1/libfftw3_threads.so
-/usr/lib64/haswell/avx512_1/libfftw3f.so
-/usr/lib64/haswell/avx512_1/libfftw3f_mpi.so
-/usr/lib64/haswell/avx512_1/libfftw3f_omp.so
-/usr/lib64/haswell/avx512_1/libfftw3f_threads.so
+/usr/lib64/glibc-hwcaps/x86-64-v3/libfftw3.so
+/usr/lib64/glibc-hwcaps/x86-64-v3/libfftw3_mpi.so
+/usr/lib64/glibc-hwcaps/x86-64-v3/libfftw3_omp.so
+/usr/lib64/glibc-hwcaps/x86-64-v3/libfftw3_threads.so
+/usr/lib64/glibc-hwcaps/x86-64-v3/libfftw3f.so
+/usr/lib64/glibc-hwcaps/x86-64-v3/libfftw3f_mpi.so
+/usr/lib64/glibc-hwcaps/x86-64-v3/libfftw3f_omp.so
+/usr/lib64/glibc-hwcaps/x86-64-v3/libfftw3f_threads.so
+/usr/lib64/glibc-hwcaps/x86-64-v4/libfftw3.so
+/usr/lib64/glibc-hwcaps/x86-64-v4/libfftw3_mpi.so
+/usr/lib64/glibc-hwcaps/x86-64-v4/libfftw3_omp.so
+/usr/lib64/glibc-hwcaps/x86-64-v4/libfftw3_threads.so
+/usr/lib64/glibc-hwcaps/x86-64-v4/libfftw3f.so
+/usr/lib64/glibc-hwcaps/x86-64-v4/libfftw3f_mpi.so
+/usr/lib64/glibc-hwcaps/x86-64-v4/libfftw3f_omp.so
+/usr/lib64/glibc-hwcaps/x86-64-v4/libfftw3f_threads.so
 /usr/lib64/haswell/libfftw3.so
-/usr/lib64/haswell/libfftw3_mpi.so
 /usr/lib64/haswell/libfftw3_omp.so
 /usr/lib64/haswell/libfftw3_threads.so
-/usr/lib64/haswell/libfftw3f.so
-/usr/lib64/haswell/libfftw3f_mpi.so
-/usr/lib64/haswell/libfftw3f_omp.so
-/usr/lib64/haswell/libfftw3f_threads.so
 /usr/lib64/libfftw3.so
 /usr/lib64/libfftw3_mpi.so
 /usr/lib64/libfftw3_omp.so
@@ -229,38 +234,44 @@ find %{buildroot}/usr/lib64 -name 'FFTW3*.cmake' -exec rm {} \;
 
 %files lib
 %defattr(-,root,root,-)
-/usr/lib64/haswell/avx512_1/libfftw3.so.3
-/usr/lib64/haswell/avx512_1/libfftw3.so.3.6.10
-/usr/lib64/haswell/avx512_1/libfftw3_mpi.so.3
-/usr/lib64/haswell/avx512_1/libfftw3_mpi.so.3.6.10
-/usr/lib64/haswell/avx512_1/libfftw3_omp.so.3
-/usr/lib64/haswell/avx512_1/libfftw3_omp.so.3.6.10
-/usr/lib64/haswell/avx512_1/libfftw3_threads.so.3
-/usr/lib64/haswell/avx512_1/libfftw3_threads.so.3.6.10
-/usr/lib64/haswell/avx512_1/libfftw3f.so.3
-/usr/lib64/haswell/avx512_1/libfftw3f.so.3.6.10
-/usr/lib64/haswell/avx512_1/libfftw3f_mpi.so.3
-/usr/lib64/haswell/avx512_1/libfftw3f_mpi.so.3.6.10
-/usr/lib64/haswell/avx512_1/libfftw3f_omp.so.3
-/usr/lib64/haswell/avx512_1/libfftw3f_omp.so.3.6.10
-/usr/lib64/haswell/avx512_1/libfftw3f_threads.so.3
-/usr/lib64/haswell/avx512_1/libfftw3f_threads.so.3.6.10
+/usr/lib64/glibc-hwcaps/x86-64-v3/libfftw3.so.3
+/usr/lib64/glibc-hwcaps/x86-64-v3/libfftw3.so.3.6.10
+/usr/lib64/glibc-hwcaps/x86-64-v3/libfftw3_mpi.so.3
+/usr/lib64/glibc-hwcaps/x86-64-v3/libfftw3_mpi.so.3.6.10
+/usr/lib64/glibc-hwcaps/x86-64-v3/libfftw3_omp.so.3
+/usr/lib64/glibc-hwcaps/x86-64-v3/libfftw3_omp.so.3.6.10
+/usr/lib64/glibc-hwcaps/x86-64-v3/libfftw3_threads.so.3
+/usr/lib64/glibc-hwcaps/x86-64-v3/libfftw3_threads.so.3.6.10
+/usr/lib64/glibc-hwcaps/x86-64-v3/libfftw3f.so.3
+/usr/lib64/glibc-hwcaps/x86-64-v3/libfftw3f.so.3.6.10
+/usr/lib64/glibc-hwcaps/x86-64-v3/libfftw3f_mpi.so.3
+/usr/lib64/glibc-hwcaps/x86-64-v3/libfftw3f_mpi.so.3.6.10
+/usr/lib64/glibc-hwcaps/x86-64-v3/libfftw3f_omp.so.3
+/usr/lib64/glibc-hwcaps/x86-64-v3/libfftw3f_omp.so.3.6.10
+/usr/lib64/glibc-hwcaps/x86-64-v3/libfftw3f_threads.so.3
+/usr/lib64/glibc-hwcaps/x86-64-v3/libfftw3f_threads.so.3.6.10
+/usr/lib64/glibc-hwcaps/x86-64-v4/libfftw3.so.3
+/usr/lib64/glibc-hwcaps/x86-64-v4/libfftw3.so.3.6.10
+/usr/lib64/glibc-hwcaps/x86-64-v4/libfftw3_mpi.so.3
+/usr/lib64/glibc-hwcaps/x86-64-v4/libfftw3_mpi.so.3.6.10
+/usr/lib64/glibc-hwcaps/x86-64-v4/libfftw3_omp.so.3
+/usr/lib64/glibc-hwcaps/x86-64-v4/libfftw3_omp.so.3.6.10
+/usr/lib64/glibc-hwcaps/x86-64-v4/libfftw3_threads.so.3
+/usr/lib64/glibc-hwcaps/x86-64-v4/libfftw3_threads.so.3.6.10
+/usr/lib64/glibc-hwcaps/x86-64-v4/libfftw3f.so.3
+/usr/lib64/glibc-hwcaps/x86-64-v4/libfftw3f.so.3.6.10
+/usr/lib64/glibc-hwcaps/x86-64-v4/libfftw3f_mpi.so.3
+/usr/lib64/glibc-hwcaps/x86-64-v4/libfftw3f_mpi.so.3.6.10
+/usr/lib64/glibc-hwcaps/x86-64-v4/libfftw3f_omp.so.3
+/usr/lib64/glibc-hwcaps/x86-64-v4/libfftw3f_omp.so.3.6.10
+/usr/lib64/glibc-hwcaps/x86-64-v4/libfftw3f_threads.so.3
+/usr/lib64/glibc-hwcaps/x86-64-v4/libfftw3f_threads.so.3.6.10
 /usr/lib64/haswell/libfftw3.so.3
 /usr/lib64/haswell/libfftw3.so.3.6.10
-/usr/lib64/haswell/libfftw3_mpi.so.3
-/usr/lib64/haswell/libfftw3_mpi.so.3.6.10
 /usr/lib64/haswell/libfftw3_omp.so.3
 /usr/lib64/haswell/libfftw3_omp.so.3.6.10
 /usr/lib64/haswell/libfftw3_threads.so.3
 /usr/lib64/haswell/libfftw3_threads.so.3.6.10
-/usr/lib64/haswell/libfftw3f.so.3
-/usr/lib64/haswell/libfftw3f.so.3.6.10
-/usr/lib64/haswell/libfftw3f_mpi.so.3
-/usr/lib64/haswell/libfftw3f_mpi.so.3.6.10
-/usr/lib64/haswell/libfftw3f_omp.so.3
-/usr/lib64/haswell/libfftw3f_omp.so.3.6.10
-/usr/lib64/haswell/libfftw3f_threads.so.3
-/usr/lib64/haswell/libfftw3f_threads.so.3.6.10
 /usr/lib64/libfftw3.so.3
 /usr/lib64/libfftw3.so.3.6.10
 /usr/lib64/libfftw3_mpi.so.3

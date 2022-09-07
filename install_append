@@ -5,17 +5,17 @@ for build in \
 	"single,--enable-float,--enable-sse2,--libdir=/usr/lib64" \
 	"double,--enable-sse2,--libdir=/usr/lib64" \
 	"long-double,--enable-long-double,--libdir=/usr/lib64" \
-	"single-avx2,--enable-float,--enable-avx2,--enable-fma,--libdir=/usr/lib64/haswell" \
+	"single-avx2,--enable-float,--enable-avx2,--enable-fma,--libdir=/usr/lib64/glibc-hwcaps/x86-64-v3" \
 	"double-avx2,--enable-avx2,--enable-fma,--libdir=/usr/lib64/haswell" \
-	"single-avx512,--enable-float,--enable-avx2,--enable-avx512,--enable-fma,--libdir=/usr/lib64/haswell/avx512_1" \
-	"double-avx512,--enable-avx2,--enable-avx512,--enable-fma,--libdir=/usr/lib64/haswell/avx512_1" \
+	"single-avx512,--enable-float,--enable-avx2,--enable-avx512,--enable-fma,--libdir=/usr/lib64/glibc-hwcaps/x86-64-v4" \
+	"double-avx512,--enable-avx2,--enable-avx512,--enable-fma,--libdir=/usr/lib64/glibc-hwcaps/x86-64-v4" \
 	"single-mpi,--enable-mpi,--enable-float,--enable-sse2,--libdir=/usr/lib64"  \
 	"double-mpi,--enable-mpi,--enable-sse2,--libdir=/usr/lib64" \
 	"long-double-mpi,--enable-mpi,--enable-long-double,--libdir=/usr/lib64" \
-	"single-avx2-mpi,--enable-mpi,--enable-float,--enable-avx2,--enable-fma,--libdir=/usr/lib64/haswell" \
-	"double-avx2-mpi,--enable-mpi,--enable-avx2,--enable-fma,--libdir=/usr/lib64/haswell" \
-	"single-avx512-mpi,--enable-mpi,--enable-float,--enable-avx2,--enable-avx512,--enable-fma,--libdir=/usr/lib64/haswell/avx512_1" \
-	"double-avx512-mpi,--enable-mpi,--enable-avx2,--enable-avx512,--enable-fma,--libdir=/usr/lib64/haswell/avx512_1" ; \
+	"single-avx2-mpi,--enable-mpi,--enable-float,--enable-avx2,--enable-fma,--libdir=/usr/lib64/glibc-hwcaps/x86-64-v3" \
+	"double-avx2-mpi,--enable-mpi,--enable-avx2,--enable-fma,--libdir=/usr/lib64/glibc-hwcaps/x86-64-v3" \
+	"single-avx512-mpi,--enable-mpi,--enable-float,--enable-avx2,--enable-avx512,--enable-fma,--libdir=/usr/lib64/glibc-hwcaps/x86-64-v4" \
+	"double-avx512-mpi,--enable-mpi,--enable-avx2,--enable-avx512,--enable-fma,--libdir=/usr/lib64/glibc-hwcaps/x86-64-v4" ; \
 do
 	skip_test=0
 	dir=$(echo $build | cut -d, -f1)
@@ -50,3 +50,5 @@ do
 done
 
 find %{buildroot}/usr/lib64 -name 'FFTW3*.cmake' -exec rm {} \;
+
+find %{buildroot}/usr/lib64/glibc-hwcaps -name '*.pc' -exec rm {} \;

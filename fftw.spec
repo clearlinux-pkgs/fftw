@@ -4,7 +4,7 @@
 #
 Name     : fftw
 Version  : 3.3.10
-Release  : 35
+Release  : 36
 URL      : http://www.fftw.org/fftw-3.3.10.tar.gz
 Source0  : http://www.fftw.org/fftw-3.3.10.tar.gz
 Summary  : fast Fourier transform library
@@ -19,6 +19,9 @@ BuildRequires : gfortran
 BuildRequires : openmpi-dev
 BuildRequires : openssh
 BuildRequires : texinfo
+# Suppress stripping binaries
+%define __strip /bin/true
+%define debug_package %{nil}
 
 %description
 FFTW is a free collection of fast C routines for computing the
@@ -94,25 +97,25 @@ export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C.UTF-8
-export SOURCE_DATE_EPOCH=1662582091
+export SOURCE_DATE_EPOCH=1672775717
 export GCC_IGNORE_WERROR=1
 export AR=gcc-ar
 export RANLIB=gcc-ranlib
 export NM=gcc-nm
-export CFLAGS="$CFLAGS -O3 -ffat-lto-objects -flto=auto "
-export FCFLAGS="$FFLAGS -O3 -ffat-lto-objects -flto=auto "
-export FFLAGS="$FFLAGS -O3 -ffat-lto-objects -flto=auto "
-export CXXFLAGS="$CXXFLAGS -O3 -ffat-lto-objects -flto=auto "
+export CFLAGS="$CFLAGS -O3 -fdebug-types-section -femit-struct-debug-baseonly -ffat-lto-objects -flto=auto -g1 -gno-column-info -gno-variable-location-views -gz "
+export FCFLAGS="$FFLAGS -O3 -fdebug-types-section -femit-struct-debug-baseonly -ffat-lto-objects -flto=auto -g1 -gno-column-info -gno-variable-location-views -gz "
+export FFLAGS="$FFLAGS -O3 -fdebug-types-section -femit-struct-debug-baseonly -ffat-lto-objects -flto=auto -g1 -gno-column-info -gno-variable-location-views -gz "
+export CXXFLAGS="$CXXFLAGS -O3 -fdebug-types-section -femit-struct-debug-baseonly -ffat-lto-objects -flto=auto -g1 -gno-column-info -gno-variable-location-views -gz "
 make  %{?_smp_mflags}  -n ||:
 
 
 %install
-export SOURCE_DATE_EPOCH=1662582091
+export SOURCE_DATE_EPOCH=1672775717
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/share/package-licenses/fftw
-cp %{_builddir}/fftw-%{version}/COPYING %{buildroot}/usr/share/package-licenses/fftw/68c94ffc34f8ad2d7bfae3f5a6b996409211c1b1
-cp %{_builddir}/fftw-%{version}/COPYRIGHT %{buildroot}/usr/share/package-licenses/fftw/1179609f742d35f1bcbf4ad694f371d64ee257ea
-cp %{_builddir}/fftw-%{version}/doc/license.texi %{buildroot}/usr/share/package-licenses/fftw/ee99393637fb0b0a5df385deac9040c5305f38b2
+cp %{_builddir}/fftw-%{version}/COPYING %{buildroot}/usr/share/package-licenses/fftw/68c94ffc34f8ad2d7bfae3f5a6b996409211c1b1 || :
+cp %{_builddir}/fftw-%{version}/COPYRIGHT %{buildroot}/usr/share/package-licenses/fftw/1179609f742d35f1bcbf4ad694f371d64ee257ea || :
+cp %{_builddir}/fftw-%{version}/doc/license.texi %{buildroot}/usr/share/package-licenses/fftw/ee99393637fb0b0a5df385deac9040c5305f38b2 || :
 :
 ## install_append content
 CFLAGS_IN="$CFLAGS -ffunction-sections -falign-functions=32 -O3 -flto -fno-semantic-interposition "

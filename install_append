@@ -1,0 +1,63 @@
+CFLAGS_IN="$CFLAGS -ffunction-sections -falign-functions=32 -O3 -flto -fno-semantic-interposition "
+CXXFLAGS_IN="$CXXFLAGS -ffunction-sections -falign-functions=32 -O3 -flto -fno-semantic-interposition "
+LDFLAGS_IN="$LDFLAGS"
+
+for build in \
+	"single,--enable-float,--enable-sse2" \
+	"double,--enable-sse2" \
+	"long-double,--enable-long-double" \
+	"single-avx2,--enable-float,--enable-avx2,--enable-fma" \
+	"double-avx2,--enable-avx2,--enable-fma" \
+	"single-avx512,--enable-float,--enable-avx2,--enable-avx512,--enable-fma" \
+	"double-avx512,--enable-avx2,--enable-avx512,--enable-fma" \
+	"single-mpi,--enable-mpi,--enable-float,--enable-sse2"  \
+	"double-mpi,--enable-mpi,--enable-sse2" \
+	"long-double-mpi,--enable-mpi,--enable-long-double" \
+	"single-avx2-mpi,--enable-mpi,--enable-float,--enable-avx2,--enable-fma" \
+	"double-avx2-mpi,--enable-mpi,--enable-avx2,--enable-fma" \
+	"single-avx512-mpi,--enable-mpi,--enable-float,--enable-avx2,--enable-avx512,--enable-fma" \
+	"double-avx512-mpi,--enable-mpi,--enable-avx2,--enable-avx512,--enable-fma" ; \
+do
+	skip_test=0
+	dir=$(echo $build | cut -d, -f1)
+	flags=$(echo $build | cut -d, -f2- | sed 's/,/ /g')
+	lib_path=$(echo $build | cut -d= -f1 --complement)
+
+	if echo $flags | grep -q avx512; then
+		export CFLAGS="$CFLAGS_IN -march=x86-64-v4 -Wl,-z,x86-64-v4"
+		export CXXFLAGS="$CXXFLAGS_IN -march=x86-64-v3 -Wl,-z,x86-64-v3"
+		export LDFLAGS="$LDFLAGS_IN -march=x86-64-v4"
+		grep -q 'avx512[^ ]*' /proc/cpuinfo || skip_test=1
+	elif echo $flags | grep -q avx2; then
+		export CFLAGS="$CFLAGS_IN -march=x86-64-v3 -Wl,-z,x86-64-v3"
+		export CXXFLAGS="$CXXFLAGS_IN -march=x86-64-v3 -Wl,-z,x86-64-v3"
+		export LDFLAGS="$LDFLAGS_IN -march=x86-64-v3"
+		grep -q 'avx2[^ ]*' /proc/cpuinfo || skip_test=1
+	else
+		export CFLAGS="$CFLAGS_IN"
+		export CXXFLAGS="$CXXFLAGS_IN"
+		export LDFLAGS="$LDFLAGS_IN"
+	fi
+
+	mkdir build-$dir
+	pushd build-$dir
+	../configure --disable-static --enable-shared --enable-threads --enable-openmp \
+		--prefix=/usr --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib64 \
+		$flags
+	make V=1 %{?_smp_mflags}
+	if echo $flags | grep -q avx512; then
+		%make_install_v4
+	elif echo $flags | grep -q avx2; then
+		%make_install_v3
+	else
+		%make_install
+	fi
+	if [ $skip_test -eq 0 ]; then
+		echo "**** Testing $dir CFLAGS:$CFLAGS "
+		LD_LIBRARY_PATH=%{buildroot}$lib_path make check
+	fi
+	popd
+done
+
+/usr/bin/elf-move.py avx512 %{buildroot}-v4 %{buildroot} %{buildroot}/usr/share/clear/filemap/filemap-%{name}
+/usr/bin/elf-move.py avx2   %{buildroot}-v3 %{buildroot} %{buildroot}/usr/share/clear/filemap/filemap-%{name}
